@@ -9,7 +9,7 @@ def getArticles(link):
     """
     'https://gunosy.com/categories/i'から記事のリンクを読み込む。
     :param: link: Str. 例：'https://gunosy.com/categories/i' あるいは任意のhtml file
-    :return list['記事１','記事2']
+    :return list of Str: ['記事１','記事2']
     """
     articles = []
     try:
@@ -25,7 +25,7 @@ def getArticles(link):
 def getCategories(link):
     """
     記事のリンクからカテゴリーとサブカテゴリーを読み込む。
-    :return list['カテゴリー１','サブカテゴリー1']
+    :return list of Str: ['カテゴリー１','サブカテゴリー1']
     """
     categories = []
     try:
@@ -41,7 +41,7 @@ def getCategories(link):
 def getTitle(link):
     """
     記事のリンクからタイトルを読み込む。
-    :return 'タイトル'
+    :return Str: タイトル
     """
     try:
         html = urlopen(link)
@@ -53,7 +53,7 @@ def getTitle(link):
 def getContent(link):
     """
     記事のリンクからコンテンツを読み込む。
-    :return 'コンテンツ'
+    :return Str: コンテンツ
     """
     try:
         html = urlopen(link)
@@ -65,7 +65,7 @@ def getContent(link):
 def getSource(link):
     """
     記事のリンクから元記事を読み込む。
-    :return '元記事'
+    :return Str: 元記事
     """
     OriginalArticle = []
     try:
