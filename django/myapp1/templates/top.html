@@ -10,10 +10,10 @@
   <body>
     {% block content %}
     <div class="home-wrap">
-      <h1 class="home-title">Gunochan</h1>
+      <h1 class="home-title">Gunosy Classifier</h1>
       <form action="result" method="POST">
         {% csrf_token %}
-        <input id="id_url" class="home-input" maxlength="200" name="url" type="text" required="" placeholder="URL here">
+        <input id="id_url" class="home-input" maxlength="200" name="url" type="text" required="" placeholder="enter news article URL here">
         <input class="home-go"type="submit" value="Go!"/>
       </form>
     </div>

@@ -4,6 +4,8 @@ from natto import MeCab
 from numpy import *
 from gensim import corpora, matutils
 
+nm = MeCab('-F%m,%f[0],%h')
+
 def getMeishi(sentence):
     """名詞だけを取り出す。
     :param sentence: String
@@ -20,14 +22,14 @@ def getMeishi(sentence):
     # %f[8] ... 発音
     #
     words = []
-    with MeCab('-F%m,%f[0],%h') as nm:
-        for n in nm.parse(sentence, as_nodes=True):
-            node = n.feature.split(',')
-            if len(node) != 3:
-                continue
-            if node[1] == '名詞':
-                # if True:
-                words.append(node[0])
+
+    for n in nm.parse(sentence, as_nodes=True):
+        node = n.feature.split(',')
+        if len(node) != 3:
+            continue
+        if node[1] == '名詞':
+            # if True:
+            words.append(node[0])
     return words
 
 def createFeature(words, dictionary):

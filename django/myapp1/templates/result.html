@@ -1,11 +1,11 @@
 {% extends "top.html" %}
 {% block content %}
 <header>
-  <div class="header-title"><a href="{% url "top" %}">Gunochan</a></div>
+  <div class="header-title"><a href="{% url "top" %}">Gunosy Classifier</a></div>
   <div class="header-again">
     <form action="result" method="POST">
       {% csrf_token %}
-      <input id="id_url" class="header-input" maxlength="200" name="url" type="text" required="" placeholder="URL here">
+      <input id="id_url" class="header-input" maxlength="200" name="url" type="text" required="" placeholder="enter news article URL here">
       <input class="header-go"type="submit" value="Go!"/>
     </form>
   </div>
