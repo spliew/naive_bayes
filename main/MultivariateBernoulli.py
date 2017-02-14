@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from bow import *
 from numpy import *
-import warnings, sys, pickle
+import warnings, sys, pickle, itertools
 from datetime import datetime
 
 class MultivariateBernoulli:
@@ -127,9 +127,8 @@ class MultivariateBernoulli:
 
         Nw=Nwc.dot(Nc)
         mutual_info=zeros([self.dictSize, self.numClasses]) # 交互情報量
-        for c in range(0, numClasses):
-            for w in range(0, dictSize):
-                mutual_info[w, c] = (Nc[c]/sum(Nc))*(log((Nwc[w,c]+1)/sum(Nc))-log(Nw[w]/sum(Nc))-log(Nc[c]/sum(Nc)))
+        for c, w in itertools.product(range(numClasses),range(dictSize)):
+            mutual_info[w, c] = (Nc[c]/sum(Nc))*(log((Nwc[w,c]+1)/sum(Nc))-log(Nw[w]/sum(Nc))-log(Nc[c]/sum(Nc)))
         mutual_info_1d=mutual_info.flatten()
         idx_1d_all = mutual_info_1d.argsort()
         idx_1d = idx_1d_all[-int(featurenumber):] #最大な交互情報量を見つける
