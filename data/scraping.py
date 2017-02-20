@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 import re
 
 
-def getArticles(link):
+def get_articles(link):
     """
     'https://gunosy.com/categories/i'から記事のリンクを読み込む。
     :param: link: Str. 例：'https://gunosy.com/categories/i' あるいは任意のhtml file
@@ -15,14 +15,15 @@ def getArticles(link):
     try:
         html = urlopen(link)
     except:
-        html = open(link,'r')
-    bs0bj=BeautifulSoup(html.read(),"html.parser")
-    for link in bs0bj.find("div",{"class":"main"}).findAll("a",href=re.compile("^(https://gunosy.com/articles/).*$")):
+        html = open(link, 'r')
+    bs0bj = BeautifulSoup(html.read(), "html.parser")
+    for link in bs0bj.find("div", {"class": "main"}).find_all("a", href=re.compile("^(https://gunosy.com/articles/).*$")):
         if 'href' in link.attrs:
             articles.append(link.attrs['href'])
     return set(articles)
 
-def getCategories(link):
+
+def get_categories(link):
     """
     記事のリンクからカテゴリーとサブカテゴリーを読み込む。
     :return list of Str: ['カテゴリー１','サブカテゴリー1']
@@ -31,14 +32,15 @@ def getCategories(link):
     try:
         html = urlopen(link)
     except:
-        html = open(link,'r') 
-    bs0bj=BeautifulSoup(html.read(),"html.parser")
-    for link in bs0bj.find("div",{"class":"breadcrumb_inner"}).findAll("a",href=re.compile("^(https://gunosy.com/categories/).*$")):
+        html = open(link, 'r')
+    bs0bj = BeautifulSoup(html.read(), "html.parser")
+    for link in bs0bj.find("div", {"class": "breadcrumb_inner"}).find_all("a", href=re.compile("^(https://gunosy.com/categories/).*$")):
         if 'href' in link.attrs:
             categories.append(int(link.attrs['href'].split('/')[-1]))
     return sorted(categories)
 
-def getTitle(link):
+
+def get_title(link):
     """
     記事のリンクからタイトルを読み込む。
     :return Str: タイトル
@@ -46,11 +48,12 @@ def getTitle(link):
     try:
         html = urlopen(link)
     except:
-        html = open(link,'r')
-    bs0bj=BeautifulSoup(html.read(),"html.parser")
+        html = open(link, 'r')
+    bs0bj = BeautifulSoup(html.read(), "html.parser")
     return bs0bj.find("h1").get_text()
 
-def getContent(link):
+
+def get_content(link):
     """
     記事のリンクからコンテンツを読み込む。
     :return Str: コンテンツ
@@ -58,22 +61,23 @@ def getContent(link):
     try:
         html = urlopen(link)
     except:
-        html = open(link,'r')
-    bs0bj=BeautifulSoup(html.read(),"html.parser")
-    return bs0bj.find("div",{"class":"article gtm-click"}).get_text()
+        html = open(link, 'r')
+    bs0bj = BeautifulSoup(html.read(), "html.parser")
+    return bs0bj.find("div", {"class": "article gtm-click"}).get_text()
 
-def getSource(link):
+
+def get_source(link):
     """
     記事のリンクから元記事を読み込む。
     :return Str: 元記事
     """
-    OriginalArticle = []
+    original_articles = []
     try:
         html = urlopen(link)
     except:
-        html = open(link,'r')
-    bs0bj=BeautifulSoup(html.read(),"html.parser")
-    for link in bs0bj.find("div",{"class":"article_media clearfix gtm-click"}).findAll("a"):
+        html = open(link, 'r')
+    bs0bj = BeautifulSoup(html.read(), "html.parser")
+    for link in bs0bj.find("div", {"class": "article_media clearfix gtm-click"}).find_all("a"):
         if 'href' in link.attrs:
-            OriginalArticle.append(link.attrs['href'])
-    return OriginalArticle[-1]
+            original_articles.append(link.attrs['href'])
+    return original_articles[-1]

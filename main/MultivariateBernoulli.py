@@ -1,10 +1,14 @@
 # -*- coding: utf-8 -*-
 from bow import *
 from numpy import *
-import warnings, sys, pickle, itertools
+import warnings
+import sys
+import pickle
+import itertools
 from datetime import datetime
 
-class MultivariateBernoulli:
+
+class multi_variate_bernoulli:
     """Multivariate Bernoulli class. バイナリの素性からクラス分類するモデル。"""
     def __init__(self, texts, labels, alpha):
         """
@@ -15,18 +19,18 @@ class MultivariateBernoulli:
         self.texts = texts
         self.labels = labels
         self.classes = list(set(self.labels))
-        self.numClasses = len(self.classes)
-        meishiList = []
+        self.num_classes = len(self.classes)
+        meishi_list = []
         for text in texts:
-            words = getMeishi(text)
-            meishiList.append(words)
-        self.dictionary  = corpora.Dictionary(meishiList)
-        self.dictSize = len(self.dictionary.token2id)
-        self.pwc = zeros([self.dictSize, self.numClasses])
-        self.pc = zeros(self.numClasses)
+            words = get_meishi(text)
+            meishi_list.append(words)
+        self.dictionary = corpora.Dictionary(meishi_list)
+        self.dict_size = len(self.dictionary.token2id)
+        self.pwc = zeros([self.dict_size, self.num_classes])
+        self.pc = zeros(self.num_classes)
         self.alpha = alpha
-        self.Nc = zeros(self.numClasses)
-        self.Nwc = zeros([self.dictSize, self.numClasses])
+        self.n_c = zeros(self.num_classes)
+        self.n_wc = zeros([self.dict_size, self.num_classes])
         self.status = 'Initialized'
 
     def train(self):
@@ -34,31 +38,31 @@ class MultivariateBernoulli:
         :return: None
         """
         alpha = self.alpha
-        numClasses = self.numClasses
-        Ndata = len(self.texts)
-        Nc = self.Nc
-        Nwc = self.Nwc
-        for iData in range(0, Ndata):
-            c = int(self.labels[iData])
-            Nc[c] += 1
+        num_classes = self.num_classes
+        n_data = len(self.texts)
+        n_c = self.n_c
+        n_wc = self.n_wc
+        for i_data in range(0, n_data):
+            c = int(self.labels[i_data])
+            n_c[c] += 1
 
         dictionary = self.dictionary
-        dictSize = len(dictionary.token2id)
-        for iText in range(0, len(self.texts)):
-            text = self.texts[iText]
-            words = getMeishi(text)
-            feature = createFeature(words, dictionary)
-            c = int(self.labels[iText])
-            for iBinary in range(0, dictSize):
-                if feature[iBinary] == 1:
-                    Nwc[iBinary, c] += 1
+        dict_size = len(dictionary.token2id)
+        for i_text in range(0, len(self.texts)):
+            text = self.texts[i_text]
+            words = get_meishi(text)
+            feature = create_feature(words, dictionary)
+            c = int(self.labels[i_text])
+            for i_binary in range(0, dict_size):
+                if feature[i_binary] == 1:
+                    n_wc[i_binary, c] += 1
 
-        for c in range(0, numClasses):
-            self.pc[c] = (Nc[c] + alpha - 1) / (sum(Nc) + numClasses * (alpha - 1))
-            for w in range(0, dictSize):
-                self.pwc[w, c] = (Nwc[w, c] + alpha - 1) / (Nc[c] + 2 * (alpha - 1))
-        self.Nwc = Nwc
-        self.Nc = Nc
+        for c in range(0, num_classes):
+            self.pc[c] = (n_c[c] + alpha - 1) / (sum(n_c) + num_classes * (alpha - 1))
+            for w in range(0, dict_size):
+                self.pwc[w, c] = (n_wc[w, c] + alpha - 1) / (n_c[c] + 2 * (alpha - 1))
+        self.n_wc = n_wc
+        self.n_c = n_c
         self.status = 'Trained'
 
     def predict(self, text):
@@ -69,10 +73,10 @@ class MultivariateBernoulli:
         """
         if self.status != 'Trained':
             warnings.warn('モデルは訓練されていません。trainを呼んで下さい。')
-        words = getMeishi(text)
-        feature = array( createFeature(words, self.dictionary) )
+        words = get_meishi(text)
+        feature = array(create_feature(words, self.dictionary) )
         logL_classes = []
-        for c in range(0, self.numClasses):
+        for c in range(0, self.num_classes):
             logL = log(self.pc[c])
             logL += sum(log(array(self.pwc)[:, c] ** feature)) + sum(log((1 - array(self.pwc[:, c]))**(1 - feature)))
             logL_classes.append(logL)
@@ -99,39 +103,39 @@ class MultivariateBernoulli:
         """
         素性選択して次元を削減する (work in progress)
         :return: None
-        :param featurenumber: Int: dictSize*numClasses
+        :param featurenumber: Int: dict_size*num_classes
         """
-        if self.dictSize*self.numClasses < featurenumber:
+        if self.dict_size*self.num_classes < featurenumber:
             print('削除されて残る素性が元の素性より大きい！')
             sys.exit()
         # copied from train(self) #
-        numClasses = self.numClasses
-        Ndata = len(self.texts)
-        Nc = self.Nc
-        Nwc = self.Nwc
-        for iData in range(0, Ndata):
-            c = int(self.labels[iData])
-            Nc[c] += 1
+        num_classes = self.num_classes
+        n_data = len(self.texts)
+        n_c = self.n_c
+        n_wc = self.n_wc
+        for i_data in range(0, n_data):
+            c = int(self.labels[i_data])
+            n_c[c] += 1
 
         dictionary = self.dictionary
-        dictSize = len(dictionary.token2id)
-        for iText in range(0, len(self.texts)):
-            text = self.texts[iText]
-            words = getMeishi(text)
-            feature = createFeature(words, dictionary)
-            c = int(self.labels[iText])
-            for iBinary in range(0, dictSize):
-                if feature[iBinary] == 1:
-                    Nwc[iBinary, c] += 1
+        dict_size = len(dictionary.token2id)
+        for i_text in range(0, len(self.texts)):
+            text = self.texts[i_text]
+            words = get_meishi(text)
+            feature = create_feature(words, dictionary)
+            c = int(self.labels[i_text])
+            for i_binary in range(0, dict_size):
+                if feature[i_binary] == 1:
+                    n_wc[i_binary, c] += 1
         # copied from train(self) #
 
-        Nw=Nwc.dot(Nc)
-        mutual_info=zeros([self.dictSize, self.numClasses]) # 交互情報量
-        for c, w in itertools.product(range(numClasses),range(dictSize)):
-            mutual_info[w, c] = (Nc[c]/sum(Nc))*(log((Nwc[w,c]+1)/sum(Nc))-log(Nw[w]/sum(Nc))-log(Nc[c]/sum(Nc)))
+        n_w=n_wc.dot(n_c)
+        mutual_info=zeros([self.dict_size, self.num_classes])  # 交互情報量
+        for c, w in itertools.product(range(num_classes), range(dict_size)):
+            mutual_info[w, c] = (n_c[c]/sum(n_c))*(log((n_wc[w, c]+1)/sum(n_c))-log(n_w[w]/sum(n_c))-log(n_c[c]/sum(n_c)))
         mutual_info_1d=mutual_info.flatten()
         idx_1d_all = mutual_info_1d.argsort()
-        idx_1d = idx_1d_all[-int(featurenumber):] #最大な交互情報量を見つける
+        idx_1d = idx_1d_all[-int(featurenumber):]  # 最大な交互情報量を見つける
         x_idx, y_idx = unravel_index(idx_1d, mutual_info.shape)
 #        bookkeeping = int(featurenumber)
 #        while len(set(x_idx)) < int(featurenumber):
@@ -139,6 +143,6 @@ class MultivariateBernoulli:
 #            idx_1d = mutual_info_1d.argsort()[-bookkeeping:] 
 #            x_idx, y_idx = unravel_index(idx_1d, mutual_info.shape)
         self.dictionary.filter_tokens(good_ids=x_idx)
-        self.dictSize = len(self.dictionary.token2id)
-        self.pwc = zeros([self.dictSize, self.numClasses])
+        self.dict_size = len(self.dictionary.token2id)
+        self.pwc = zeros([self.dict_size, self.num_classes])
         self.status = 'dimensionReduced'

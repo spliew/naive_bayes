@@ -1,16 +1,20 @@
 # -*- coding: utf-8 -*-
 from django.shortcuts import render
-from .forms import MyForm
 from urllib.request import urlopen
 from bs4 import BeautifulSoup
-import sys, pickle
+import sys
+import pickle
+
+from .forms import MyForm
+
 sys.path.append('../main')
-from MultivariateBernoulli import *
+from multi_variate_bernoulli import *
 
 
 def top(request):
     """top ページを返す"""
     return render(request, "top.html")
+
 
 def result(request):
     """結果ページを返す"""
@@ -21,14 +25,15 @@ def result(request):
             h1, ps, predictions = process(url)
             # 結果表示ページに渡すデータ
             context = {
-                'url':url,
+                'url': url,
                 'h1': h1,
-                'ps':ps,
+                'ps': ps,
                 'predictions': predictions
             }
             return render(request, "result.html", context)
     else:
         return render(request, "top.html")
+
 
 def process(url):
     """
@@ -59,12 +64,12 @@ def predict(text):
     出力例: 予測クラスが2 なら {'エンタメ':0, 'スポーツ':100,...}
     """
 
-    categories = "エンタメ スポーツ おもしろ 国内 国外 コラム IT科学 グルメ".split() # カテゴリーのリスト
+    categories = "エンタメ スポーツ おもしろ 国内 国外 コラム IT科学 グルメ".split()  # カテゴリーのリスト
 
     with open('../model/1486962747.pickle', 'rb') as pickle_file:
-        model=pickle.load(pickle_file)
+        model = pickle.load(pickle_file)
     x = int(model.predict(text))
-    probs =  [0]*8
+    probs = [0]*8
     probs[x] = 100
 
     predictions = {}

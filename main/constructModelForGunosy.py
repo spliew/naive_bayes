@@ -1,118 +1,122 @@
 # -*- coding: utf-8 -*-
-from MultivariateBernoulli import *
+from multi_variate_bernoulli import *
 # import sqlite3, random
 from numpy import *
+import random
 import time
 
-def readData(trainvalidTestRatio):
+
+def read_data(train_valid_test_ratio):
     """data/gunosyInTextからテキストデータを読み込む。(../dataで sh selectData.shでテキストデータを作る)
 
-    :param trainvalidTestRatio: List of length 3. train, validation, testデータの割合. 例:[0.6, 0.2, 0.2]
+    :param train_valid_test_ratio: List of length 3. train, validation, testデータの割合. 例:[0.6, 0.2, 0.2]
     :return dict(). data. N*, X*, y*を保存する（*はtrain, valid, test）
     """
-    titleCategoryList = []
+    title_category_list = []
     classes = []
     for c in range(1, 9):
         # f = open('../data/gunosyInText/' + str(c) + ".txt", encoding='euc-jp', errors='ignore')
         f = open('../data/gunosyInText/' + str(c) + ".txt", errors='ignore')
-        titleCategory = f.readlines()
+        title_category = f.readlines()
         f.close()
-        titleCategoryList += titleCategory
-        classes += [c] * len(titleCategory)
+        title_category_list += title_category
+        classes += [c] * len(title_category)
     data = []
     for i in range(0, len(classes)):
-        data.append([classes[i], titleCategoryList[i]])
+        data.append([classes[i], title_category_list[i]])
 
-    Ndata = len(data)
-    Ntrain = int(Ndata * trainvalidTestRatio[0])
-    Nvalid = int(Ndata * trainvalidTestRatio[1])
-    Ntest= Ndata - Ntrain - Nvalid
+    n_data = len(data)
+    n_train = int(n_data * train_valid_test_ratio[0])
+    n_valid = int(n_data * train_valid_test_ratio[1])
+    n_test= n_data - n_train - n_valid
 
-    random.shuffle(data) # train, validate, test集合に分けるためにshuffle
+    random.shuffle(data)  # train, validate, test集合に分けるためにshuffle
     X = []
     classes = []
     for datum in data:
         text = datum[1]
-        category = datum[0] - 1 # 学習機に入れるときはカテゴリーラベルが0から始まるようにする
+        category = datum[0] - 1  # 学習機に入れるときはカテゴリーラベルが0から始まるようにする
         X.append(text)
         classes.append(category)
 
-    Xtrain = X[0:Ntrain]
-    Xvalid = X[Ntrain: Ntrain + Nvalid]
-    Xtest = X[Ntrain + Nvalid: Ndata]
-    ytrain = array(classes[0:Ntrain])
-    yvalid = array(classes[Ntrain: Ntrain + Nvalid])
-    ytest = array(classes[Ntrain + Nvalid: Ndata])
-    data = {'Ntrain': Ntrain,'Nvalid': Nvalid,'Ntest': Ntest, 'Xtrain': Xtrain, 'Xvalid': Xvalid, 'Xtest': Xtest, 'ytrain': ytrain, 'yvalid': yvalid, 'ytest': ytest}
+    x_train = X[0:n_train]
+    x_valid = X[n_train: n_train + n_valid]
+    x_test = X[n_train + n_valid: n_data]
+    y_train = array(classes[0:n_train])
+    y_valid = array(classes[n_train: n_train + n_valid])
+    y_test = array(classes[n_train + n_valid: n_data])
+    data = {'n_train': n_train, 'n_valid': n_valid, 'n_test': n_test, 'x_train': x_train, 'x_valid': x_valid, 'x_test': x_test, 'y_train': y_train, 'y_valid': y_valid, 'y_test': y_test}
     return data
+
 
 def validate(data, modelName, param):
     """
     validationする。
-    :param data: readDataのreturn値。
+    :param data: read_dataのreturn値。
     :param modelName: Str. 今のところ"MB"にしか対応していない。
     :param param: Str. モデルのパラメータ (alpha)。
-    :return [errorRatevalid,errorRatetest]: validation, test dataに対する誤分類率。
+    :return [error_rate_valid,error_rate_test]: validation, test dataに対する誤分類率。
     """
     if modelName == 'MB':
-        model = MultivariateBernoulli(data['Xtrain'], data['ytrain'], alpha=param['alpha'])
+        model = multi_variate_bernoulli(data['x_train'], data['y_train'], alpha = param['alpha'])
     else:
         raise RuntimeError('MB (Multivariate Bernoulli)以外は使えません。')
 
     model.train()
     predcList = []
-    for x in data['Xvalid']:
+    for x in data['x_valid']:
         predc = model.predict(x)
         predcList.append(predc)
 
-    predcArray = array(predcList)
-    errorRatevalid = (data['Nvalid'] - sum(predcArray == data['yvalid'])) / data['Nvalid']
+    predc_array = array(predcList)
+    error_rate_valid = (data['n_valid'] - sum(predc_array == data['y_valid'])) / data['n_valid']
 
     predcList2 = []
-    for x in data['Xtest']:
+    for x in data['x_test']:
         predc2 = model.predict(x)
         predcList2.append(predc2)
 
-    predcArray2 = array(predcList2)
-    errorRatetest = (data['Ntest'] - sum(predcArray2 == data['ytest'])) / data['Ntest']
+    predc_array2 = array(predcList2)
+    error_rate_test = (data['n_test'] - sum(predc_array2 == data['y_test'])) / data['n_test']
+
+    return [error_rate_valid, error_rate_test]
 
 
-    return [errorRatevalid,errorRatetest]
-
-def gridSearch(data, modelName, para, gridRange):
+def grid_search(data, modelName, para, gridRange):
     """
     grid search する。
-    :param data: readDataのreturn値。
+    :param data: read_dataのreturn値。
     :param modelName: String. 今のところ"MB"にしか対応していない。
     :param para: String. grid search するモデルのパラメータ (今のところ'alpha'にしか対応してない)。
     :return None: 結果がterminalに出力される。
     """
-    for i in arange(gridRange[0],gridRange[1],gridRange[2]):
-        errorRate = validate(data, 'MB', {para: i})
-        print("alpha = {}, errorRateValid = {}, errorRateTest = {}".format(i,errorRate[0],errorRate[1]))
+    for i in arange(gridRange[0], gridRange[1], gridRange[2]):
+        error_rate = validate(data, 'MB', {para: i})
+        print("alpha = {}, error_rate_valid = {}, error_rate_test = {}".format(i, error_rate[0], error_rate[1]))
 
-def trainWithAllData():
+
+def train_with_all_data():
     """
     すべてのデータをtrainしてmodelをpickleフォーマットとして出力
     """
-    trainvalidTestRatio = [1, 0, 0]
-    data = readData(trainvalidTestRatio)
-    model = MultivariateBernoulli(data['Xtrain'], data['ytrain'], alpha=1.001)
+    train_valid_test_ratio = [1, 0, 0]
+    data = read_data(train_valid_test_ratio)
+    model = multi_variate_bernoulli(data['x_train'], data['y_train'], alpha=1.001)
     model.train()
     model.dump("../model/")
 
 if __name__ == '__main__':
-    trainvalidTestRatio = [0.8, 0.1, 0.1]
+    train_valid_test_ratio = [0.8, 0.1, 0.1]
 
     # alphaのtuningをする
-    # data = readData(trainvalidTestRatio)
-    # gridSearch(data,'MB','alpha',[1.001,1.002,0.1])
+    # data = read_data(train_valid_test_ratio)
+    # grid_search(data,'MB','alpha',[1.001,1.002,0.1])
 
-    # errorRateを計算する
+    # error_rateを計算する
 
-    # daata = readData(trainvalidTestRatio)
-    # errorRate = validate(data, 'MB', {'alpha': 2})
-    # print(errorRate)
-    start_time = time.time()
-    trainWithAllData()
-    print("--- %s seconds ---" % (time.time() - start_time))
+# data = read_data(train_valid_test_ratio)
+    # error_rate = validate(data, 'MB', {'alpha': 2})
+    # print(error_rate)
+    # start_time = time.time()
+    # train_with_all_data()
+    # print("--- %s seconds ---" % (time.time() - start_time))
