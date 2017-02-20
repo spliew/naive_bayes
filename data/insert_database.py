@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from scraping import *
+import scraping as sp
 import sqlite3
 import os
 
@@ -25,18 +25,18 @@ def insert_database(cat):
     for link in htmls:
         primary_id = link.split('.')[0]
         link = path+link
-        title = get_title(link)
+        title = sp.get_title(link)
         try:
-            category = get_categories(link)[0]
-            subcategory = get_categories(link)[1]
+            category = sp.get_categories(link)[0]
+            subcategory = sp.get_categories(link)[1]
         except:  # カテゴリーのない記事もある#
-            category=0
-            subcategory=0
-        content = get_content(link)
-        source = get_source(link)
+            category = 0
+            subcategory = 0
+        content = sp.get_content(link)
+        source = sp.get_source(link)
         sql = 'insert into news (id, title, category, subcategory, content, source) values (?,?,?,?,?,?)'
         news = (primary_id, title, category, subcategory, content, source)
-        c.execute(sql,news)
+        c.execute(sql, news)
     conn.commit()
     conn.close()
 

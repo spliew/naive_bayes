@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from bow import *
-from numpy import *
+from numpy import zeros, array, sum, log
 import warnings
 import sys
 import pickle
@@ -74,14 +74,14 @@ class MultivariateBernoulli:
         if self.status != 'Trained':
             warnings.warn('モデルは訓練されていません。trainを呼んで下さい。')
         words = get_meishi(text)
-        feature = array(create_feature(words, self.dictionary) )
-        logL_classes = []
+        feature = array(create_feature(words, self.dictionary))
+        log_l_classes = []
         for c in range(0, self.num_classes):
-            logL = log(self.pc[c])
-            logL += sum(log(array(self.pwc)[:, c] ** feature)) + sum(log((1 - array(self.pwc[:, c]))**(1 - feature)))
-            logL_classes.append(logL)
+            log_l = log(self.pc[c])
+            log_l += sum(log(array(self.pwc)[:, c] ** feature)) + sum(log((1 - array(self.pwc[:, c]))**(1 - feature)))
+            log_l_classes.append(log_l)
 
-        predc = int(array(logL_classes).argmax())
+        predc = int(array(log_l_classes).argmax())
         return predc
 
     def dump(self, destination):
@@ -99,16 +99,16 @@ class MultivariateBernoulli:
             pickle.dump(self, f)
         return filename
 
-    def featureSelection(self,featurenumber=8000):
+    def feature_selection(self, feature_number=8000):
         """
         素性選択して次元を削減する (work in progress)
         :return: None
-        :param featurenumber: Int: dict_size*num_classes
+        :param feature_number: Int: dict_size*num_classes
         """
-        if self.dict_size*self.num_classes < featurenumber:
+        if self.dict_size*self.num_classes < feature_number:
             print('削除されて残る素性が元の素性より大きい！')
             sys.exit()
-        # copied from train(self) #
+        # copied from train(self)
         num_classes = self.num_classes
         n_data = len(self.texts)
         n_c = self.n_c
@@ -127,18 +127,18 @@ class MultivariateBernoulli:
             for i_binary in range(0, dict_size):
                 if feature[i_binary] == 1:
                     n_wc[i_binary, c] += 1
-        # copied from train(self) #
+        # copied from train(self)
 
         n_w = n_wc.dot(n_c)
         mutual_info = zeros([self.dict_size, self.num_classes])  # 交互情報量
         for c, w in itertools.product(range(num_classes), range(dict_size)):
             mutual_info[w, c] = (n_c[c]/sum(n_c))*(log((n_wc[w, c]+1)/sum(n_c))-log(n_w[w]/sum(n_c))-log(n_c[c]/sum(n_c)))
-        mutual_info_1d=mutual_info.flatten()
+        mutual_info_1d = mutual_info.flatten()
         idx_1d_all = mutual_info_1d.argsort()
-        idx_1d = idx_1d_all[-int(featurenumber):]  # 最大な交互情報量を見つける
+        idx_1d = idx_1d_all[-int(feature_number):]  # 最大な交互情報量を見つける
         x_idx, y_idx = unravel_index(idx_1d, mutual_info.shape)
-#        bookkeeping = int(featurenumber)
-#        while len(set(x_idx)) < int(featurenumber):
+#        bookkeeping = int(feature_number)
+#        while len(set(x_idx)) < int(feature_number):
 #            bookkeeping = bookkeeping + 1
 #            idx_1d = mutual_info_1d.argsort()[-bookkeeping:] 
 #            x_idx, y_idx = unravel_index(idx_1d, mutual_info.shape)

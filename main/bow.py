@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from natto import MeCab
-from numpy import *
+from numpy import array
 from gensim import corpora, matutils
 
 nm = MeCab('-F%m,%f[0],%h')

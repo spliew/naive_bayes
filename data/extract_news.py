@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-from . scraping import get_articles
+from scraping import get_articles
 
 from urllib.request import urlretrieve
-from numpy import *
+from numpy import arange
 
 
 def extract_news(cat1, cat2, pages):

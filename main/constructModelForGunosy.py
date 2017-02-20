@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from MultivariateBernoulli import *
 # import sqlite3, random
-from numpy import *
+from numpy import array, arange, sum
 import random
 import time
 
@@ -28,7 +28,7 @@ def read_data(train_valid_test_ratio):
     n_data = len(data)
     n_train = int(n_data * train_valid_test_ratio[0])
     n_valid = int(n_data * train_valid_test_ratio[1])
-    n_test= n_data - n_train - n_valid
+    n_test = n_data - n_train - n_valid
 
     random.shuffle(data)  # train, validate, test集合に分けるためにshuffle
     X = []
@@ -49,48 +49,48 @@ def read_data(train_valid_test_ratio):
     return data
 
 
-def validate(data, modelName, param):
+def validate(data, model_name, param):
     """
     validationする。
     :param data: read_dataのreturn値。
-    :param modelName: Str. 今のところ"MB"にしか対応していない。
+    :param model_name: Str. 今のところ"MB"にしか対応していない。
     :param param: Str. モデルのパラメータ (alpha)。
     :return [error_rate_valid,error_rate_test]: validation, test dataに対する誤分類率。
     """
-    if modelName == 'MB':
-        model = MultivariateBernoulli(data['x_train'], data['y_train'], alpha = param['alpha'])
+    if model_name == 'MB':
+        model = MultivariateBernoulli(data['x_train'], data['y_train'], alpha=param['alpha'])
     else:
         raise RuntimeError('MB (Multivariate Bernoulli)以外は使えません。')
 
     model.train()
-    predcList = []
+    predc_list = []
     for x in data['x_valid']:
         predc = model.predict(x)
-        predcList.append(predc)
+        predc_list.append(predc)
 
-    predc_array = array(predcList)
+    predc_array = array(predc_list)
     error_rate_valid = (data['n_valid'] - sum(predc_array == data['y_valid'])) / data['n_valid']
 
-    predcList2 = []
+    predc_list2 = []
     for x in data['x_test']:
         predc2 = model.predict(x)
-        predcList2.append(predc2)
+        predc_list2.append(predc2)
 
-    predc_array2 = array(predcList2)
+    predc_array2 = array(predc_list2)
     error_rate_test = (data['n_test'] - sum(predc_array2 == data['y_test'])) / data['n_test']
 
     return [error_rate_valid, error_rate_test]
 
 
-def grid_search(data, modelName, para, gridRange):
+def grid_search(data, model_name, para, grid_range):
     """
     grid search する。
     :param data: read_dataのreturn値。
-    :param modelName: String. 今のところ"MB"にしか対応していない。
+    :param model_name: String. 今のところ"MB"にしか対応していない。
     :param para: String. grid search するモデルのパラメータ (今のところ'alpha'にしか対応してない)。
     :return None: 結果がterminalに出力される。
     """
-    for i in arange(gridRange[0], gridRange[1], gridRange[2]):
+    for i in arange(grid_range[0], grid_range[1], grid_range[2]):
         error_rate = validate(data, 'MB', {para: i})
         print("alpha = {}, error_rate_valid = {}, error_rate_test = {}".format(i, error_rate[0], error_rate[1]))
 
@@ -109,14 +109,16 @@ if __name__ == '__main__':
     train_valid_test_ratio = [0.8, 0.1, 0.1]
 
     # alphaのtuningをする
-    # data = read_data(train_valid_test_ratio)
-    # grid_search(data,'MB','alpha',[1.001,1.002,0.1])
+
+    data = read_data(train_valid_test_ratio)
+    grid_search(data,'MB','alpha',[1.001,1.002,0.001])
 
     # error_rateを計算する
 
-    data = read_data(train_valid_test_ratio)
-    error_rate = validate(data, 'MB', {'alpha': 2})
-    print(error_rate)
+    # data = read_data(train_valid_test_ratio)
+    # error_rate = validate(data, 'MB', {'alpha': 2})
+    # print(error_rate)
+
     # start_time = time.time()
     # train_with_all_data()
     # print("--- %s seconds ---" % (time.time() - start_time))
