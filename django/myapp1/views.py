@@ -8,7 +8,7 @@ import pickle
 from .forms import MyForm
 
 sys.path.append('../main')
-from multi_variate_bernoulli import *
+from MultivariateBernoulli import *
 
 
 def top(request):

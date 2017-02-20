@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from multi_variate_bernoulli import *
+from MultivariateBernoulli import *
 # import sqlite3, random
 from numpy import *
 import random
@@ -58,7 +58,7 @@ def validate(data, modelName, param):
     :return [error_rate_valid,error_rate_test]: validation, test dataに対する誤分類率。
     """
     if modelName == 'MB':
-        model = multi_variate_bernoulli(data['x_train'], data['y_train'], alpha = param['alpha'])
+        model = MultivariateBernoulli(data['x_train'], data['y_train'], alpha = param['alpha'])
     else:
         raise RuntimeError('MB (Multivariate Bernoulli)以外は使えません。')
 
@@ -101,7 +101,7 @@ def train_with_all_data():
     """
     train_valid_test_ratio = [1, 0, 0]
     data = read_data(train_valid_test_ratio)
-    model = multi_variate_bernoulli(data['x_train'], data['y_train'], alpha=1.001)
+    model = MultivariateBernoulli(data['x_train'], data['y_train'], alpha=1.001)
     model.train()
     model.dump("../model/")
 
@@ -114,9 +114,9 @@ if __name__ == '__main__':
 
     # error_rateを計算する
 
-# data = read_data(train_valid_test_ratio)
-    # error_rate = validate(data, 'MB', {'alpha': 2})
-    # print(error_rate)
+    data = read_data(train_valid_test_ratio)
+    error_rate = validate(data, 'MB', {'alpha': 2})
+    print(error_rate)
     # start_time = time.time()
     # train_with_all_data()
     # print("--- %s seconds ---" % (time.time() - start_time))

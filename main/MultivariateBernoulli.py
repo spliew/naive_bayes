@@ -8,7 +8,7 @@ import itertools
 from datetime import datetime
 
 
-class multi_variate_bernoulli:
+class MultivariateBernoulli:
     """Multivariate Bernoulli class. バイナリの素性からクラス分類するモデル。"""
     def __init__(self, texts, labels, alpha):
         """
@@ -129,8 +129,8 @@ class multi_variate_bernoulli:
                     n_wc[i_binary, c] += 1
         # copied from train(self) #
 
-        n_w=n_wc.dot(n_c)
-        mutual_info=zeros([self.dict_size, self.num_classes])  # 交互情報量
+        n_w = n_wc.dot(n_c)
+        mutual_info = zeros([self.dict_size, self.num_classes])  # 交互情報量
         for c, w in itertools.product(range(num_classes), range(dict_size)):
             mutual_info[w, c] = (n_c[c]/sum(n_c))*(log((n_wc[w, c]+1)/sum(n_c))-log(n_w[w]/sum(n_c))-log(n_c[c]/sum(n_c)))
         mutual_info_1d=mutual_info.flatten()
