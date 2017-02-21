@@ -106,12 +106,13 @@ def train_with_all_data():
     model.dump("../model/")
 
 if __name__ == '__main__':
-    train_valid_test_ratio = [0.8, 0.1, 0.1]
+    train_with_all_data()
+    # train_valid_test_ratio = [0.8, 0.1, 0.1]
 
     # alphaのtuningをする
 
-    data = read_data(train_valid_test_ratio)
-    grid_search(data,'MB','alpha',[1.001,1.002,0.001])
+    # data = read_data(train_valid_test_ratio)
+    # grid_search(data,'MB','alpha',[1.001,1.002,0.001])
 
     # error_rateを計算する
 

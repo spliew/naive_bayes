@@ -66,7 +66,7 @@ def predict(text):
 
     categories = "エンタメ スポーツ おもしろ 国内 国外 コラム IT科学 グルメ".split()  # カテゴリーのリスト
 
-    with open('../model/1486962747.pickle', 'rb') as pickle_file:
+    with open('../model/1487645508.pickle', 'rb') as pickle_file:
         model = pickle.load(pickle_file)
     x = int(model.predict(text))
     probs = [0]*8
