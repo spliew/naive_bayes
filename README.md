@@ -11,7 +11,7 @@ cd django
 ## ウェブアプリ
 https://fierce-island-51792.herokuapp.com/
 
-##必要なLibrary
+## 必要なLibrary
 - bs4
 - gensim
 - natto
@@ -19,7 +19,7 @@ https://fierce-island-51792.herokuapp.com/
 - sqlite3
 
 
-#Steps
+# Steps
 - 記事をscrapeして、databaseを作る
   * data/extract_news.py, data/insert_database.py を使う
 - 記事を形態素解析して、ナイーブベイズを使って訓練させる
